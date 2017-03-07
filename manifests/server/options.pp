@@ -138,7 +138,7 @@ define dns::server::options (
   $data_dir = $::dns::server::params::data_dir,
   $dnssec_validation = $::dns::server::params::default_dnssec_validation,
   $dnssec_enable = $::dns::server::params::default_dnssec_enable,
-	$filter_aaaa_on_v4 = undef,
+  $filter_aaaa_on_v4 = undef,
   $forward_policy = undef,
   $forwarders = [],
   $listen_on = [],
