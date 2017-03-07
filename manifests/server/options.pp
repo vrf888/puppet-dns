@@ -50,8 +50,8 @@
 # [*filter_aaaa_on_v4*]
 #   Defines whether the server will return AAAA records to certain clients. 
 #   For example clients that do not have IPv6 network access can be excluded. 
-#		Such clients are defined by the address match list parameter of the filter-aaaa option.
-#		 BIND must be compiled with the --enable-filter-aaaa option on the configure command line. 
+#   Such clients are defined by the address match list parameter of the filter-aaaa option.
+#   BIND must be compiled with the --enable-filter-aaaa option on the configure command line. 
 #
 # [*forward_policy*]
 #   The forwarding policy to use.  Must be `first` or `only`.
