@@ -57,6 +57,11 @@ options {
     };
 
 <% end -%>
+
+<% if @filter_aaaa_on_v4 -%>
+  filter-aaaa-on-v4 <%= @filter_aaaa_on_v4 %>;
+<% end -%>
+
 <% if @listen_on_port -%>
     port <%= @listen_on_port %>;
 

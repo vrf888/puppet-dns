@@ -47,6 +47,12 @@
 #   dnssec_validation above), and true on Debian and on RedHat 6
 #   and above.
 #
+# [*filter_aaaa_on_v4*]
+#   Defines whether the server will return AAAA records to certain clients. 
+#   For example clients that do not have IPv6 network access can be excluded. 
+#		Such clients are defined by the address match list parameter of the filter-aaaa option.
+#		 BIND must be compiled with the --enable-filter-aaaa option on the configure command line. 
+#
 # [*forward_policy*]
 #   The forwarding policy to use.  Must be `first` or `only`.
 #   If not defined, the `named` default of `first` will be used.
@@ -132,6 +138,7 @@ define dns::server::options (
   $data_dir = $::dns::server::params::data_dir,
   $dnssec_validation = $::dns::server::params::default_dnssec_validation,
   $dnssec_enable = $::dns::server::params::default_dnssec_enable,
+	$filter_aaaa_on_v4 = undef,
   $forward_policy = undef,
   $forwarders = [],
   $listen_on = [],
