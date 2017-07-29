@@ -14,6 +14,8 @@
 # domain, it will be appended to the value of `$host` in the `PTR`
 # record; if `$zone` is undefined or empty, then `$host`
 # must include the domain name (but must *not* include any trailing `.`).
+# If `$host` is `@` and `$zone` is non-empty, `$zone` will be used by
+# itself in the `PTR` record.
 #
 # * `$ttl`
 # The TTL of the records to be created.  Defaults to undefined.
@@ -75,7 +77,9 @@ define dns::record::ptr::by_ip (
   $host,
   $zone = undef,
   $ttl = undef,
-  $ip = $name ) {
+  $ip = $name,
+  $data_dir = $::dns::server::config::data_dir,
+) {
 
   # split the IP address up into three host/zone pairs based on class A, B, or C splits:
   # For IP address A.B.C.D,
@@ -106,15 +110,20 @@ define dns::record::ptr::by_ip (
   }
 
   if $zone != undef and $zone != '' {
-    $fqdn = "${host}.${zone}"
+    if $host == '@' {
+      $fqdn = $zone
+    } else {
+      $fqdn = "${host}.${zone}"
+    }
   } else {
     $fqdn = $host
   }
 
   dns::record::ptr { "${octet}.${reverse_zone}":
-    host => $octet,
-    zone => $reverse_zone,
-    ttl  => $ttl,
-    data => $fqdn,
+    host     => $octet,
+    zone     => $reverse_zone,
+    ttl      => $ttl,
+    data     => $fqdn,
+    data_dir => $data_dir,
   }
 }

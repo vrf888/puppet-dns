@@ -29,6 +29,23 @@
 #   Restrict the character set and syntax of network responses.
 #   Default: undefined, meaning "ignore"
 #
+# [*control_channel_ip*]
+#   String of one ip for which the control api is bound.
+#   Default: undef, meaning the control channel is disable,
+#            both control_channel_port and control_channel_ip must be defined
+#            for the control api to be enabled
+#
+# [*control_channel_port*]
+#   String of one port for which the control api is bound.
+#   Default: undef, meaning the control channel is disable
+#            both control_channel_port and control_channel_ip must be defined
+#            for the control api to be enabled
+#
+# [*control_channel_allow*]
+#   Array of IPs that are allowed to query the controls channel.
+#   Default: undef, meaning all IPs that can reach control_channel_ip are allowed
+#            to query it
+#
 # [*data_dir*]
 #   Bind data directory.
 #   Default: `/etc/bind/zones` in Debian, `/var/named` in RedHat.
@@ -69,6 +86,18 @@
 # [*listen_on_port*]:
 #   UDP/TCP port number to use for receiving and sending traffic.
 #   Default: undefined, meaning 53
+#
+# [*log_categories*]
+#   Logging categories to use. It is a hash of arrays. Each key of the hash is a category
+#   and its value is the array of options. If `query_log_enable` is set to true, then
+#   this value is ignored.
+#   Default: empty.
+#
+# [*log_channels*]
+#   Logging channels to use. It is a hash of arrays. Each key of the hash is a channel
+#   and its value is the array of options. If `query_log_enable` is set to true, then
+#   this value is ignored.
+#   Default: empty.
 #
 # [*no_empty_zones*]
 #   Controls whether to enable/disable empty zones. Boolean values.
@@ -121,6 +150,10 @@
 #   The working directory where the query log will be stored.
 #   Default: `/var/cache/bind` in Debian, `${data_dir}/data` in RedHat
 #
+# [*extra_options* ]
+#   Hash with other options that will be included.
+#   Default: empty.
+#
 # === Examples
 #
 #  dns::server::options { '/etc/bind/named.conf.options':
@@ -135,6 +168,9 @@ define dns::server::options (
   $check_names_master = undef,
   $check_names_slave = undef,
   $check_names_response = undef,
+  $control_channel_ip = undef,
+  $control_channel_port = undef,
+  $control_channel_allow = undef,
   $data_dir = $::dns::server::params::data_dir,
   $dnssec_validation = $::dns::server::params::default_dnssec_validation,
   $dnssec_enable = $::dns::server::params::default_dnssec_enable,
@@ -144,6 +180,8 @@ define dns::server::options (
   $listen_on = [],
   $listen_on_ipv6 = [],
   $listen_on_port = undef,
+  $log_channels = {},
+  $log_categories = {},
   $no_empty_zones = false,
   $notify_source = undef,
   $query_log_enable = undef,
@@ -154,6 +192,7 @@ define dns::server::options (
   $transfer_source = undef,
   $working_dir = $::dns::server::params::working_dir,
   $zone_notify = undef,
+  $extra_options = {},
 ) {
   $valid_check_names = ['fail', 'warn', 'ignore']
   $valid_forward_policy = ['first', 'only']
@@ -195,6 +234,18 @@ define dns::server::options (
     validate_array($statistic_channel_allow)
   }
 
+  if $control_channel_port != undef and !is_numeric($control_channel_port) {
+    fail('The control_channel_port is not a number')
+  }
+
+  if $control_channel_ip != undef and (!is_string($control_channel_ip) or !is_ip_address($control_channel_ip)) {
+    fail('The control_channel_ip is not an ip string')
+  }
+
+  if $control_channel_allow != undef {
+    validate_array($control_channel_allow)
+  }
+
   validate_array($also_notify)
 
   $valid_zone_notify = ['yes', 'no', 'explicit', 'master-only']
@@ -225,6 +276,11 @@ define dns::server::options (
   # validate these, just in case they're overridden
   validate_absolute_path($data_dir)
   validate_absolute_path($working_dir)
+
+  validate_hash($log_channels)
+  validate_hash($log_categories)
+
+  validate_hash($extra_options)
 
   file { $title:
     ensure  => present,

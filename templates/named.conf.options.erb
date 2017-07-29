@@ -130,11 +130,29 @@ options {
     dnssec-enable no;
 <% end -%>
     auth-nxdomain no;    # conform to RFC1035
+
+<%- @extra_options.each do |k, v| -%>
+  <%- if v.is_a?(Array) -%>
+    <%= k %> {
+    <%- v.each do |value| -%>
+      <%= value %>;
+    <%- end -%>
+    };
+  <%- else -%>
+    <%= k %> <%= v %>;
+  <%- end -%>
+<%- end -%>
 };
 
 <% if @statistic_channel_ip and @statistic_channel_port -%>
 statistics-channels {
     inet <%= @statistic_channel_ip %> port <%= @statistic_channel_port %><% if @statistic_channel_allow -%> allow { <%= @statistic_channel_allow.join('; ') %>; }<% end -%>;
+};
+<% end -%>
+
+<% if @control_channel_ip and @control_channel_port -%>
+controls {
+    inet <%= @control_channel_ip %> port <%= @control_channel_port %><% if @control_channel_allow -%> allow { <%= @control_channel_allow.join('; ') %>; }<% end -%>;
 };
 <% end -%>
 
@@ -157,5 +175,23 @@ logging {
         };
         category default { syslog_errors;  };
         category lame-servers { null; };
+};
+<%- elsif !@log_channels.empty? or !@log_categories.empty? -%>
+logging {
+  <%- @log_channels.each do |channel, options| -%>
+    channel <%= channel %> {
+    <%- options.each do |o| -%>
+      <%= o %>;
+    <%- end -%>
+    };
+  <%- end -%>
+
+  <%- @log_categories.each do |category, options| -%>
+    category <%= category %> {
+    <%- options.each do |o| -%>
+      <%= o %>;
+    <%- end -%>
+    };
+  <%- end -%>
 };
 <% end -%>
