@@ -3,6 +3,6 @@ fixtures:
     stdlib: "puppetlabs/stdlib"
     concat:
       repo: "puppetlabs/concat"
-      ref: "2.2.0"
+      ref: "2.2.1"
   symlinks:
     dns: "#{source_dir}"
